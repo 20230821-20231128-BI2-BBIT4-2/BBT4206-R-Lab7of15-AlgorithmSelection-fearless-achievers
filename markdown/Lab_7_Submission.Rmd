@@ -1,6 +1,6 @@
 ---
 title: "Business Intelligence Project"
-author: "Team Champions"
+author: "Team Fearless Achievers"
 date: "| Date:30/10/2023"
 output:
   github_document: 
@@ -17,16 +17,8 @@ editor_options:
 
 |                                              |                  |
 |----------------------------------------------|------------------|
-| **Student ID Number**                        | 126761           |
-|                                              | 134111           |
-|                                              | 133996           |
-|                                              | 127707           |
-|                                              | 135859           |
-| **Student Name**                             | Virginia Wanjiru |
-|                                              | Immaculate Haayo |
-|                                              | Trevor Ngugi     |
-|                                              | Clarice Muthoni  |
-|                                              | Pauline Wairimu  |
+| **Student ID Number**                        | 134126        |
+| **Student Name**                             | Adrianna Bitutu |
 | **BBIT 4.2 Group**                           | B                |
 | **BI Project Group Name/ID (if applicable)** | Champions        |
 
@@ -44,70 +36,7 @@ knitr::opts_chunk$set(
 )
 
 
-# STEP 1. Install and Load the Required Packages ----
-## stats ----
-if (require("stats")) {
-  require("stats")
-} else {
-  install.packages("stats", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
 
-## mlbench ----
-if (require("mlbench")) {
-  require("mlbench")
-} else {
-  install.packages("mlbench", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## caret ----
-if (require("caret")) {
-  require("caret")
-} else {
-  install.packages("caret", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## MASS ----
-if (require("MASS")) {
-  require("MASS")
-} else {
-  install.packages("MASS", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## glmnet ----
-if (require("glmnet")) {
-  require("glmnet")
-} else {
-  install.packages("glmnet", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## e1071 ----
-if (require("e1071")) {
-  require("e1071")
-} else {
-  install.packages("e1071", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## kernlab ----
-if (require("kernlab")) {
-  require("kernlab")
-} else {
-  install.packages("kernlab", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## rpart ----
-if (require("rpart")) {
-  require("rpart")
-} else {
-  install.packages("rpart", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
 ```
 
 # Understanding the Structure of Data     
@@ -229,62 +158,7 @@ fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
 # Clustering
 
 ```{r Carry Out Clustering}
-# STEP 1. Install and Load the Required Packages ----
-## readr ----
-if (require("readr")) {
-  require("readr")
-} else {
-  install.packages("readr", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
 
-## naniar ----
-if (require("naniar")) {
-  require("naniar")
-} else {
-  install.packages("naniar", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## ggplot2 ----
-if (require("ggplot2")) {
-  require("ggplot2")
-} else {
-  install.packages("ggplot2", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## corrplot ----
-if (require("corrplot")) {
-  require("corrplot")
-} else {
-  install.packages("corrplot", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## ggcorrplot ----
-if (require("ggcorrplot")) {
-  require("ggcorrplot")
-} else {
-  install.packages("ggcorrplot", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## caret ----
-if (require("caret")) {
-  require("caret")
-} else {
-  install.packages("caret", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## dplyr ----
-if (require("dplyr")) {
-  require("dplyr")
-} else {
-  install.packages("dplyr", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
 
 # STEP 2. Load the Dataset ----
 library(readr)

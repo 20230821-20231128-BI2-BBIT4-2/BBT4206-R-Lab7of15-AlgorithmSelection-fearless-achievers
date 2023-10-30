@@ -1,6 +1,6 @@
 Business Intelligence Project
 ================
-Team Champions
+Team Fearless Achievers
 \| Date:30/10/2023
 
 - [Student Details](#student-details)
@@ -17,18 +17,14 @@ Team Champions
 
 |                                              |                  |
 |----------------------------------------------|------------------|
-| **Student ID Number**                        | 126761           |
-|                                              | 134111           |
-|                                              | 133996           |
-|                                              | 127707           |
-|                                              | 135859           |
-| **Student Name**                             | Virginia Wanjiru |
-|                                              | Immaculate Haayo |
-|                                              | Trevor Ngugi     |
-|                                              | Clarice Muthoni  |
-|                                              | Pauline Wairimu  |
+| **Student ID Number**                        | 134126         |
+|                                              |         |
+|                                              |          |
+|                                              |          |
+|                                              |         |
+| **Student Name**                             | Adrianna Bitutu|
 | **BBIT 4.2 Group**                           | B                |
-| **BI Project Group Name/ID (if applicable)** | Champions        |
+| **BI Project Group Name/ID (if applicable)** |       |
 
 # Setup Chunk
 
@@ -361,95 +357,9 @@ fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
 # Clustering
 
 ``` r
-# STEP 1. Install and Load the Required Packages ----
-## readr ----
-if (require("readr")) {
-  require("readr")
-} else {
-  install.packages("readr", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
 
-## naniar ----
-if (require("naniar")) {
-  require("naniar")
-} else {
-  install.packages("naniar", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-```
 
-    ## Loading required package: naniar
-
-``` r
-## ggplot2 ----
-if (require("ggplot2")) {
-  require("ggplot2")
-} else {
-  install.packages("ggplot2", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## corrplot ----
-if (require("corrplot")) {
-  require("corrplot")
-} else {
-  install.packages("corrplot", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-```
-
-    ## Loading required package: corrplot
-
-    ## corrplot 0.92 loaded
-
-``` r
-## ggcorrplot ----
-if (require("ggcorrplot")) {
-  require("ggcorrplot")
-} else {
-  install.packages("ggcorrplot", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-```
-
-    ## Loading required package: ggcorrplot
-
-``` r
-## caret ----
-if (require("caret")) {
-  require("caret")
-} else {
-  install.packages("caret", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-
-## dplyr ----
-if (require("dplyr")) {
-  require("dplyr")
-} else {
-  install.packages("dplyr", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-```
-
-    ## Loading required package: dplyr
-
-    ## 
-    ## Attaching package: 'dplyr'
-
-    ## The following object is masked from 'package:MASS':
-    ## 
-    ##     select
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-
+  
 ``` r
 # STEP 2. Load the Dataset ----
 library(readr)
