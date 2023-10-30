@@ -1,0 +1,552 @@
+---
+title: "Business Intelligence Project"
+author: "Team Champions"
+date: "| Date:30/10/2023"
+output:
+  github_document: 
+    toc: yes
+    toc_depth: 4
+    fig_width: 6
+    fig_height: 4
+    df_print: default
+editor_options:
+  chunk_output_type: console
+---
+
+# Student Details
+
+|                                              |                  |
+|----------------------------------------------|------------------|
+| **Student ID Number**                        | 126761           |
+|                                              | 134111           |
+|                                              | 133996           |
+|                                              | 127707           |
+|                                              | 135859           |
+| **Student Name**                             | Virginia Wanjiru |
+|                                              | Immaculate Haayo |
+|                                              | Trevor Ngugi     |
+|                                              | Clarice Muthoni  |
+|                                              | Pauline Wairimu  |
+| **BBIT 4.2 Group**                           | B                |
+| **BI Project Group Name/ID (if applicable)** | Champions        |
+
+# Setup Chunk
+
+**Note:** the following KnitR options have been set as the global defaults: <BR> `knitr::opts_chunk$set(echo = TRUE, warning = FALSE, eval = TRUE, collapse = FALSE, tidy = TRUE)`.
+
+More KnitR options are documented here <https://bookdown.org/yihui/rmarkdown-cookbook/chunk-options.html> and here <https://yihui.org/knitr/options/>.
+
+```{r setup, include=FALSE}
+library(formatR)
+knitr::opts_chunk$set(
+  warning = FALSE,
+  collapse = FALSE
+)
+
+
+# STEP 1. Install and Load the Required Packages ----
+## stats ----
+if (require("stats")) {
+  require("stats")
+} else {
+  install.packages("stats", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## mlbench ----
+if (require("mlbench")) {
+  require("mlbench")
+} else {
+  install.packages("mlbench", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## caret ----
+if (require("caret")) {
+  require("caret")
+} else {
+  install.packages("caret", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## MASS ----
+if (require("MASS")) {
+  require("MASS")
+} else {
+  install.packages("MASS", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## glmnet ----
+if (require("glmnet")) {
+  require("glmnet")
+} else {
+  install.packages("glmnet", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## e1071 ----
+if (require("e1071")) {
+  require("e1071")
+} else {
+  install.packages("e1071", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## kernlab ----
+if (require("kernlab")) {
+  require("kernlab")
+} else {
+  install.packages("kernlab", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## rpart ----
+if (require("rpart")) {
+  require("rpart")
+} else {
+  install.packages("rpart", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+```
+
+# Understanding the Structure of Data     
+
+## Loading the Dataset
+
+### Source:
+
+The dataset that was used can be downloaded here: <https://drive.google.com/drive/folders/1-BGEhfOwquXF6KKXwcvrx7WuZXuqmW9q?usp=sharing>
+
+### Reference:
+
+*\
+Refer to the APA 7th edition manual for rules on how to cite datasets: <https://apastyle.apa.org/style-grammar-guidelines/references/examples/data-set-references>*
+##### Linear Regression 
+```{r Linear Regression}
+
+
+```
+##### Logistic Regression without caret
+```{r Carry out Logistic Regression}
+
+## 2. Logistic Regression ----
+### 2.a. Logistic Regression without caret ----
+# The glm() function is in the stats package and creates a
+# generalized linear model for regression or classification.
+# It can be configured to perform a logistic regression suitable for BINARY
+# classification problems.
+
+#### Load and split the dataset ----
+library(readr)
+chest_disease <- read_csv("../data/chest_disease.csv")
+
+
+
+# Define a 70:30 train:test data split of the dataset.
+train_index <- createDataPartition(chest_disease$Outcome,
+                                   p = 0.7,
+                                   list = FALSE)
+chest_disease_train <- chest_disease[train_index, ]
+chest_disease_test <- chest_disease[-train_index, ]
+
+#### Train the model ----
+
+chest_disease_model_glm <- glm(Outcome ~ ., data = chest_disease_train,
+                            family = binomial(link = "logit"))
+
+#### Display the model's details ----
+print(chest_disease_model_glm)
+
+#### Make predictions ----
+probabilities <- predict(chest_disease_model_glm, chest_disease_test[, 1:8],
+                         type = "response")
+print(probabilities)
+predictions <- ifelse(probabilities > 0.5, "Yes", "No")
+print(predictions)
+
+#### Display the model's evaluation metrics ----
+table(predictions, chest_disease_test$Outcome)
+
+# Read the following article on how to compute various evaluation metrics using
+# the confusion matrix:
+# https://en.wikipedia.org/wiki/Confusion_matrix
+
+
+
+
+```
+
+##### Logistic Regression with caret
+```{r Carry out Logistic Regression with caret}
+
+library(readr)
+chest_disease <- read_csv("../data/chest_disease.csv")
+View(chest_disease)
+
+# Define a 70:30 train:test data split of the dataset.
+train_index <- createDataPartition(chest_disease$Outcome,
+                                   p = 0.7,
+                                   list = FALSE)
+chest_disease_train <- chest_disease[train_index, ]
+chest_disease_test <- chest_disease[-train_index, ]
+
+#### Train the model ----
+# We apply the 5-fold cross validation resampling method
+
+train_control <- trainControl(method = "cv", number = 5)
+# We can use "regLogistic" instead of "glm"
+# Notice the data transformation applied when we call the train function
+# in caret, i.e., a standardize data transform (centre + scale)
+set.seed(7)
+
+chest_disease_caret_model_logistic <-
+  train(Outcome ~ ., data = chest_disease_train,
+        method = "glm", metric = "RMSE",
+        preProcess = c("center", "scale"), trControl = train_control)
+
+#### Display the model's details ----
+print(chest_disease_caret_model_logistic)
+
+#### Make predictions ----
+predictions <- predict(chest_disease_caret_model_logistic,
+                       chest_disease_test[, 1:8])
+predictions<-as.factor(chest_disease_test$Outcome)
+
+#### Display the model's evaluation metrics ----
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         as.factor(chest_disease_test[, 1:9]$Outcome))
+print(confusion_matrix)
+
+fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
+             main = "Confusion Matrix")
+
+```
+
+
+
+# Clustering
+
+```{r Carry Out Clustering}
+# STEP 1. Install and Load the Required Packages ----
+## readr ----
+if (require("readr")) {
+  require("readr")
+} else {
+  install.packages("readr", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## naniar ----
+if (require("naniar")) {
+  require("naniar")
+} else {
+  install.packages("naniar", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## ggplot2 ----
+if (require("ggplot2")) {
+  require("ggplot2")
+} else {
+  install.packages("ggplot2", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## corrplot ----
+if (require("corrplot")) {
+  require("corrplot")
+} else {
+  install.packages("corrplot", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## ggcorrplot ----
+if (require("ggcorrplot")) {
+  require("ggcorrplot")
+} else {
+  install.packages("ggcorrplot", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## caret ----
+if (require("caret")) {
+  require("caret")
+} else {
+  install.packages("caret", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## dplyr ----
+if (require("dplyr")) {
+  require("dplyr")
+} else {
+  install.packages("dplyr", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+# STEP 2. Load the Dataset ----
+library(readr)
+train <- read_csv("../data/train.csv")
+View(train)
+
+train <-
+  read_csv("../data/train.csv",
+           col_types =
+             cols(ID = col_double(),
+                  Gender = col_character(),
+                  Ever_Married = col_character(),
+                  Age = col_double(),
+                  Graduated = col_character(),
+                  Profession = col_character(),
+                  Work_Experience = col_double(),
+                  Family_Size = col_double(),
+                  Spending_Score = col_character(),
+                  Var_1 = col_character(),
+                  Segmentation = col_character()))
+
+
+train$Profession <- factor(train$Profession)
+
+str(train)
+dim(train)
+head(train)
+summary(train)
+
+# STEP 3. Check for Missing Data and Address it ----
+# Are there missing values in the dataset?
+any_na(train)
+
+# How many?
+n_miss(train)
+
+# What is the proportion of missing data in the entire dataset?
+prop_miss(train)
+
+# What is the number and percentage of missing values grouped by
+# each variable?
+miss_var_summary(train)
+
+# Which variables contain the most missing values?
+gg_miss_var(train)
+
+# Which combinations of variables are missing together?
+gg_miss_upset(train)
+
+# Where are missing values located (the shaded regions in the plot)?
+vis_miss(train) +
+  theme(axis.text.x = element_text(angle = 80))
+
+## OPTION 1: Remove the observations with missing values ----
+# We can decide to remove all the observations that have missing values
+# as follows:
+train_removed_obs <- train %>% filter(complete.cases(.))
+
+train_removed_obs <-
+  train %>%
+  dplyr::filter(complete.cases(.))
+
+# The initial dataset had 8068 observations and 11 variables
+dim(train)
+
+# The filtered dataset has 6665 observations and 11 variables
+dim(train_removed_obs)
+
+# Are there missing values in the dataset?
+any_na(train_removed_obs)
+
+## OPTION 2: Remove the variables with missing values ----
+# Alternatively, we can decide to remove the 2 variables that have missing data
+train_removed_vars <-
+  train %>%
+  dplyr::select(-Work_Experience, -Family_Size)
+
+# The initial dataset had 8068 observations and 11 variables
+dim(train)
+
+# The filtered dataset has 8068 observations and 11 variables
+dim(train_removed_vars)
+
+# Are there missing values in the dataset?
+any_na(train_removed_vars)
+
+## OPTION 3: Perform Data Imputation ----
+
+# CAUTION:
+# 1. Avoid Over-imputation:
+# Be cautious when imputing dates, especially if it is
+# Missing Not at Random (MNAR).
+# Over-Imputing can introduce bias into your analysis. For example, if dates
+# are missing because of a specific event or condition, imputing dates might
+# not accurately represent the data.
+
+# 2. Consider the Business Context:
+# Dates often have a significant business or domain context. Imputing dates
+# may not always be appropriate, as it might distort the interpretation of
+# your data. For example, imputing order dates could lead to incorrect insights
+# into seasonality trends.
+
+
+# STEP 4. Perform EDA and Feature Selection ----
+## Compute the correlations between variables ----
+# We identify the correlated variables because it is these correlated variables
+# that can then be used to identify the clusters.
+
+# Create a correlation matrix
+# Option 1: Basic Table
+cor(train_removed_obs[, c(1, 4, 7, 9)]) %>%
+  View()
+
+# Option 2: Basic Plot
+cor(train_removed_obs[, c(1, 4, 7, 9)]) %>%
+  corrplot(method = "square")
+
+# Option 3: Fancy Plot using ggplot2
+corr_matrix <- cor(train_removed_obs[, c(1, 4, 7, 9)])
+
+p <- ggplot2::ggplot(data = reshape2::melt(corr_matrix),
+                     ggplot2::aes(Var1, Var2, fill = value)) +
+  ggplot2::geom_tile() +
+  ggplot2::geom_text(ggplot2::aes(label = label_wrap(label, width = 10)),
+                     size = 4) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+
+ggcorrplot(corr_matrix, hc.order = TRUE, type = "lower", lab = TRUE)
+
+
+## Plot the scatter plots ----
+# A scatter plot to show a person's Work Experience against Variable
+ggplot(train_removed_obs,
+       aes(Work_Experience, Var_1,
+           color = Age,
+           shape = Spending_Score)) +
+  geom_point(alpha = 0.5) +
+  xlab("Work Experience") +
+  ylab("Variable")
+
+
+# A scatter plot to show Spending Score against Segmentation
+ggplot(train_removed_obs,
+       aes(Spending_Score, Segmentation,
+           color = Graduated, shape = Segmentation)) +
+  geom_point(alpha = 0.5) +
+  xlab("Spending Score") +
+  ylab("Segmentation")
+
+
+## Transform the data ----
+# The K Means Clustering algorithm performs better when data transformation has
+# been applied. This helps to standardize the data making it easier to compare
+# multiple variables.
+
+summary(train_removed_obs)
+model_of_the_transform <- preProcess(train_removed_obs, method = c("scale", "center"))
+print(model_of_the_transform)
+train_removed_obs_std <- predict(model_of_the_transform, train_removed_obs)
+summary(train_removed_obs_std)  # Use 'train_removed_obs_std' here, not 'train_obs_std'
+sapply(train_removed_obs_std[, c(1, 4, 7, 9)], sd)
+
+## Select the features to use to create the clusters ----
+# OPTION 1: Use all the numeric variables to create the clusters
+train_vars <- train_removed_obs_std[, c(1, 4, 7, 9)]
+
+train_vars <-
+  train_removed_obs_std[, c("Age",
+                            "Work_Experience")]
+
+# STEP 5. Create the clusters using the K-Means Clustering Algorithm ----
+# We start with a random guess of the number of clusters we need
+set.seed(7)
+kmeans_cluster <- kmeans(train_vars, centers = 3, nstart = 20)
+
+# We then decide the maximum number of clusters to investigate
+n_clusters <- 8
+
+# Initialize total within sum of squares error: wss
+wss <- numeric(n_clusters)
+
+set.seed(7)
+
+# Investigate 1 to n possible clusters (where n is the maximum number of 
+# clusters that we want to investigate)
+for (i in 1:n_clusters) {
+  # Use the K Means cluster algorithm to create each cluster
+  kmeans_cluster <- kmeans(train_vars, centers = i, nstart = 20)
+  # Save the within cluster sum of squares
+  wss[i] <- kmeans_cluster$tot.withinss
+}
+
+## Plot a scree plot ----
+# The scree plot should help you to note when additional clusters do not make
+# any significant difference (the plateau).
+wss_df <- tibble(clusters = 1:n_clusters, wss = wss)
+
+scree_plot <- ggplot(wss_df, aes(x = clusters, y = wss, group = 1)) +
+  geom_point(size = 4) +
+  geom_line() +
+  scale_x_continuous(breaks = c(2, 4, 6, 8)) +
+  xlab("Number of Clusters")
+
+
+# OPTION 2: Use only the most significant variables to create the clusters
+# This can be informed by feature selection, or by the business case.
+
+scree_plot
+
+# We can add guides to make it easier to identify the plateau (or "elbow").
+scree_plot +
+  geom_hline(
+    yintercept = wss,
+    linetype = "dashed",
+    col = c(rep("#000000", 5), "#FF0000", rep("#000000", 2))
+  )
+
+# The plateau is reached at 8 clusters.
+# We therefore create the final cluster with 8 clusters
+# (not the initial 3 used at the beginning of this STEP.)
+k <- 6
+set.seed(7)
+# Build model with k clusters: kmeans_cluster
+kmeans_cluster <- kmeans(train_vars, centers = k, nstart = 20)
+
+# STEP 6. Add the cluster number as a label for each observation ----
+train_removed_obs$cluster_id <- factor(kmeans_cluster$cluster)
+
+## View the results by plotting scatter plots with the labelled cluster ----
+ggplot(train_removed_obs, aes(Work_Experience, Var_1,
+                              color = cluster_id)) +
+  geom_point(alpha = 0.5) +
+  xlab("How long a person has worked") +
+  ylab("Type of variable")
+
+ggplot(train_removed_obs,
+       aes(Spending_Score, Segmentation, color = cluster_id)) +
+  geom_point(alpha = 0.5) +
+  xlab("Total Spending Amount") +
+  ylab("Characteristic of Each Segment")
+
+# Note on Clustering for both Descriptive and Predictive Data Analytics ----
+# Clustering can be used for both descriptive and predictive analytics.
+# It is more commonly used around Exploratory Data Analysis which is
+# descriptive analytics.
+
+# The results of clustering, i.e., a label of the cluster can be fed as input
+# to a supervised learning algorithm. The trained model can then be used to
+# predict the cluster that a new observation will belong to.
+
+
+
+
+```
+# Association
+
+```{r Carrying out association}
+
+
+
+
+```
+
+
