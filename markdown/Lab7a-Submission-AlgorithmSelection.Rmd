@@ -57,6 +57,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, eval = TRUE,
 # Understanding the Structure of Data
 
 ## Loading the Dataset
+library(readr)
+IRIS <- read_csv("data/IRIS.csv")
+View(IRIS)
 
 ### Source:
 

@@ -35,6 +35,8 @@ here <https://yihui.org/knitr/options/>.
 
 ## Loading the Dataset
 
+library(readr) IRIS \<- read_csv(“data/IRIS.csv”) View(IRIS)
+
 ### Source:
 
 The dataset that was used can be downloaded here:
