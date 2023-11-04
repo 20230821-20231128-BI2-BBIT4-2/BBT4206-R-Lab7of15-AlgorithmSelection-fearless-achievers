@@ -98,7 +98,6 @@ lapply(.libPaths(), list.files)
 # use R for VS Code), then it can be installed manually as follows (restart R
 # after executing the command):
 
-
 if (require("languageserver")) {
   require("languageserver")
 } else {
@@ -209,7 +208,6 @@ if (require("languageserver")) {
 
 # Watch the following video: https://youtu.be/4b5d3muPQmA?si=7F9d2A6_MlqSsag2
 
-
 # STEP 1. Install and Load the Required Packages ----
 ## readr ----
 if (require("readr")) {
@@ -259,114 +257,49 @@ if (require("caret")) {
                    repos = "https://cloud.r-project.org")
 }
 
-## dplyr ----
-if (require("dplyr")) {
-  require("dplyr")
+## tidyverse ----
+if (require("tidyverse")) {
+  require("tidyverse")
 } else {
-  install.packages("dplyr", dependencies = TRUE,
+  install.packages("tidyverse", dependencies = TRUE,
                    repos = "https://cloud.r-project.org")
 }
 
 # STEP 2. Load the Dataset ----
+
 library(readr)
-train <- read_csv("data/train.csv")
-View(train)
-
-train <-
-  read_csv("data/train.csv",
-           col_types =
-             cols(ID = col_double(),
-                  Gender = col_character(),
-                  Ever_Married = col_character(),
-                  Age = col_double(),
-                  Graduated = col_character(),
-                  Profession = col_character(),
-                  Work_Experience = col_double(),
-                  Family_Size = col_double(),
-                  Spending_Score = col_character(),
-                  Var_1 = col_character(),
-                  Segmentation = col_character()))
+Wine <- read_csv("data/Wine.csv")
+View(Wine)
 
 
-train$Profession <- factor(train$Profession)
-
-str(train)
-dim(train)
-head(train)
-summary(train)
+str(Wine)
+dim(Wine)
+head(Wine)
+summary(Wine)
 
 # STEP 3. Check for Missing Data and Address it ----
 # Are there missing values in the dataset?
-any_na(train)
+any_na(Wine)
 
 # How many?
-n_miss(train)
+n_miss(Wine)
 
 # What is the proportion of missing data in the entire dataset?
-prop_miss(train)
+prop_miss(Wine)
 
 # What is the number and percentage of missing values grouped by
 # each variable?
-miss_var_summary(train)
+miss_var_summary(Wine)
 
 # Which variables contain the most missing values?
-gg_miss_var(train)
+gg_miss_var(Wine)
 
 # Which combinations of variables are missing together?
-gg_miss_upset(train)
+gg_miss_upset(Wine)
 
 # Where are missing values located (the shaded regions in the plot)?
-vis_miss(train) +
+vis_miss(Wine) +
   theme(axis.text.x = element_text(angle = 80))
-
-## OPTION 1: Remove the observations with missing values ----
-# We can decide to remove all the observations that have missing values
-# as follows:
-train_removed_obs <- train %>% filter(complete.cases(.))
-
-train_removed_obs <-
-  train %>%
-  dplyr::filter(complete.cases(.))
-
-# The initial dataset had 8068 observations and 11 variables
-dim(train)
-
-# The filtered dataset has 6665 observations and 11 variables
-dim(train_removed_obs)
-
-# Are there missing values in the dataset?
-any_na(train_removed_obs)
-
-## OPTION 2: Remove the variables with missing values ----
-# Alternatively, we can decide to remove the 2 variables that have missing data
-train_removed_vars <-
-  train %>%
-  dplyr::select(-Work_Experience, -Family_Size)
-
-# The initial dataset had 8068 observations and 11 variables
-dim(train)
-
-# The filtered dataset has 8068 observations and 11 variables
-dim(train_removed_vars)
-
-# Are there missing values in the dataset?
-any_na(train_removed_vars)
-
-## OPTION 3: Perform Data Imputation ----
-
-# CAUTION:
-# 1. Avoid Over-imputation:
-# Be cautious when imputing dates, especially if it is
-# Missing Not at Random (MNAR).
-# Over-Imputing can introduce bias into your analysis. For example, if dates
-# are missing because of a specific event or condition, imputing dates might
-# not accurately represent the data.
-
-# 2. Consider the Business Context:
-# Dates often have a significant business or domain context. Imputing dates
-# may not always be appropriate, as it might distort the interpretation of
-# your data. For example, imputing order dates could lead to incorrect insights
-# into seasonality trends.
 
 
 # STEP 4. Perform EDA and Feature Selection ----
@@ -376,15 +309,15 @@ any_na(train_removed_vars)
 
 # Create a correlation matrix
 # Option 1: Basic Table
-cor(train_removed_obs[, c(1, 4, 7, 9)]) %>%
+cor(Wine[, c(6, 7, 10, 11)]) %>%
   View()
 
 # Option 2: Basic Plot
-cor(train_removed_obs[, c(1, 4, 7, 9)]) %>%
+cor(Wine[, c(6, 7, 10, 11)]) %>%
   corrplot(method = "square")
 
 # Option 3: Fancy Plot using ggplot2
-corr_matrix <- cor(train_removed_obs[, c(1, 4, 7, 9)])
+corr_matrix <- cor(Wine[, c(6, 7, 10, 11)])
 
 p <- ggplot2::ggplot(data = reshape2::melt(corr_matrix),
                      ggplot2::aes(Var1, Var2, fill = value)) +
@@ -396,25 +329,32 @@ p <- ggplot2::ggplot(data = reshape2::melt(corr_matrix),
 
 ggcorrplot(corr_matrix, hc.order = TRUE, type = "lower", lab = TRUE)
 
-
 ## Plot the scatter plots ----
-# A scatter plot to show a person's Work Experience against Variable
-ggplot(train_removed_obs,
-       aes(Work_Experience, Var_1,
-           color = Age,
-           shape = Spending_Score)) +
-  geom_point(alpha = 0.5) +
-  xlab("Work Experience") +
-  ylab("Variable")
+# A scatter plot to show Phenols against Flavanoids
+ggplot(Wine, aes(x=Total_Phenols, y=Flavanoids)) +
+  geom_point() +
+  geom_smooth(method="lm", se=FALSE) +
+  labs(title="Wines Attributes",
+       subtitle="Relationship between Phenols and Flavanoids") +
+  theme_bw()
 
 
-# A scatter plot to show Spending Score against Segmentation
-ggplot(train_removed_obs,
-       aes(Spending_Score, Segmentation,
-           color = Graduated, shape = Segmentation)) +
-  geom_point(alpha = 0.5) +
-  xlab("Spending Score") +
-  ylab("Segmentation")
+# A scatter plot to show Alcohol against Malic Acid
+ggplot(Wine, aes(x=Alcohol, y=Malic_Acid)) +
+  geom_point() +
+  geom_smooth(method="lm", se=FALSE) +
+  labs(title="Wines Attributes",
+       subtitle="Relationship between Alcohol and Malic Acid") +
+  theme_bw()
+
+# A scatter plot to show Magnesium against the Hue
+ggplot(Wine, aes(x=Magnesium, y=Hue)) +
+  geom_point() +
+  geom_smooth(method="lm", se=FALSE) +
+  labs(title="Wines Attributes",
+       subtitle="Relationship between Magnesium and Hue") +
+  theme_bw()
+
 
 
 ## Transform the data ----
@@ -422,28 +362,27 @@ ggplot(train_removed_obs,
 # been applied. This helps to standardize the data making it easier to compare
 # multiple variables.
 
-summary(train_removed_obs)
-model_of_the_transform <- preProcess(train_removed_obs, method = c("scale", "center"))
-print(model_of_the_transform)
-train_removed_obs_std <- predict(model_of_the_transform, train_removed_obs)
-summary(train_removed_obs_std)  # Use 'train_removed_obs_std' here, not 'train_obs_std'
-sapply(train_removed_obs_std[, c(1, 4, 7, 9)], sd)
+summary(Wine)
+model_of_the_transform_wine <- preProcess(Wine,
+                                          method = c("scale", "center"))
+print(model_of_the_transform_wine)
+Wine_std <- predict(model_of_the_transform_wine, Wine)
+summary(Wine_std)
+sapply(Wine_std[, c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)], sd)
 
-## Select the features to use to create the clusters ----
-# OPTION 1: Use all the numeric variables to create the clusters
-train_vars <- train_removed_obs_std[, c(1, 4, 7, 9)]
+# OPTION 2: Use only the most significant variables to create the clusters
+# This can be informed by feature selection, or by the business case.
 
-train_vars <-
-  train_removed_obs_std[, c("Age",
-                            "Work_Experience")]
+Wine_vars <-
+  Wine_std[, c("Total_Phenols","Flavanoids")]
 
 # STEP 5. Create the clusters using the K-Means Clustering Algorithm ----
 # We start with a random guess of the number of clusters we need
 set.seed(7)
-kmeans_cluster <- kmeans(train_vars, centers = 3, nstart = 20)
+kmeans_cluster <- kmeans(Wine_vars, centers = 2, nstart = 20)
 
 # We then decide the maximum number of clusters to investigate
-n_clusters <- 8
+n_clusters <- 3
 
 # Initialize total within sum of squares error: wss
 wss <- numeric(n_clusters)
@@ -454,7 +393,7 @@ set.seed(7)
 # clusters that we want to investigate)
 for (i in 1:n_clusters) {
   # Use the K Means cluster algorithm to create each cluster
-  kmeans_cluster <- kmeans(train_vars, centers = i, nstart = 20)
+  kmeans_cluster <- kmeans(Wine_vars, centers = i, nstart = 20)
   # Save the within cluster sum of squares
   wss[i] <- kmeans_cluster$tot.withinss
 }
@@ -470,10 +409,6 @@ scree_plot <- ggplot(wss_df, aes(x = clusters, y = wss, group = 1)) +
   scale_x_continuous(breaks = c(2, 4, 6, 8)) +
   xlab("Number of Clusters")
 
-
-# OPTION 2: Use only the most significant variables to create the clusters
-# This can be informed by feature selection, or by the business case.
-
 scree_plot
 
 # We can add guides to make it easier to identify the plateau (or "elbow").
@@ -481,32 +416,27 @@ scree_plot +
   geom_hline(
     yintercept = wss,
     linetype = "dashed",
-    col = c(rep("#000000", 5), "#FF0000", rep("#000000", 2))
+    col = "#000000"  # Set a single color, e.g., black
   )
 
-# The plateau is reached at 8 clusters.
-# We therefore create the final cluster with 8 clusters
+# The plateau is reached at 6 clusters.
+# We therefore create the final cluster with 6 clusters
 # (not the initial 3 used at the beginning of this STEP.)
-k <- 6
+k <- 3
 set.seed(7)
 # Build model with k clusters: kmeans_cluster
-kmeans_cluster <- kmeans(train_vars, centers = k, nstart = 20)
+kmeans_cluster <- kmeans(Wine_vars, centers = k, nstart = 20)
 
 # STEP 6. Add the cluster number as a label for each observation ----
-train_removed_obs$cluster_id <- factor(kmeans_cluster$cluster)
+Wine_vars$cluster_id <- factor(kmeans_cluster$cluster)
 
 ## View the results by plotting scatter plots with the labelled cluster ----
-ggplot(train_removed_obs, aes(Work_Experience, Var_1,
-                              color = cluster_id)) +
+ggplot(Wine_vars, aes(Total_Phenols, Flavanoids,
+                      color = cluster_id)) +
   geom_point(alpha = 0.5) +
-  xlab("How long a person has worked") +
-  ylab("Type of variable")
+  xlab("Total_Phenols") +
+  ylab("Flavanoids")
 
-ggplot(train_removed_obs,
-       aes(Spending_Score, Segmentation, color = cluster_id)) +
-  geom_point(alpha = 0.5) +
-  xlab("Total Spending Amount") +
-  ylab("Characteristic of Each Segment")
 
 # Note on Clustering for both Descriptive and Predictive Data Analytics ----
 # Clustering can be used for both descriptive and predictive analytics.
@@ -516,3 +446,8 @@ ggplot(train_removed_obs,
 # The results of clustering, i.e., a label of the cluster can be fed as input
 # to a supervised learning algorithm. The trained model can then be used to
 # predict the cluster that a new observation will belong to.
+
+# References ----
+## Ali, M. (2022, August). Clustering in Machine Learning: 5 Essential Clustering Algorithms. https://www.datacamp.com/blog/clustering-in-machine-learning-5-essential-clustering-algorithms # nolint ----
+
+## Cox, M., Morris, J., & Higgins, T. (2023). Airbnb Dataset for Cape Town in South Africa [Dataset; CSV]. Inside Airbnb. http://insideairbnb.com/cape-town/ # nolint ----
