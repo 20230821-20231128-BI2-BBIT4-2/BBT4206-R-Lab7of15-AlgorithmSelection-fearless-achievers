@@ -35,6 +35,8 @@ here <https://yihui.org/knitr/options/>.
 
 ## Loading the Dataset
 
+library(readr) Wine \<- read_csv(“data/Wine.csv”) View(Wine)
+
 ### Source:
 
 The dataset that was used can be downloaded here:
@@ -114,9 +116,6 @@ Loading and viewing of the dataset
 
 ``` code
 
-library(readr)
-Wine <- read_csv("data/Wine.csv")
-View(Wine)
 
 
 str(Wine)

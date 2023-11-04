@@ -56,6 +56,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, eval = TRUE,
 # Understanding the Structure of Data
 
 ## Loading the Dataset
+library(readr)
+Wine <- read_csv("data/Wine.csv")
+View(Wine)
 
 ### Source:
 
@@ -137,9 +140,6 @@ Loading and viewing of the dataset
 
 ```{Code Chunk Two}
 
-library(readr)
-Wine <- read_csv("data/Wine.csv")
-View(Wine)
 
 
 str(Wine)
