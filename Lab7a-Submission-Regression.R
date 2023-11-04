@@ -235,6 +235,8 @@ print(paste("SST =", sprintf(sst, fmt = "%#.4f")))
 ##### R Squared ----
 # We then use SSR and SST to compute the value of R squared.
 # The closer the R squared value is to 1, the better the model.
+#sprintf- to determine which format you want your output to be in 
+
 r_squared <- 1 - (ssr / sst)
 print(paste("R Squared =", sprintf(r_squared, fmt = "%#.4f")))
 
@@ -259,6 +261,10 @@ boston_housing_train <- BostonHousing[train_index, ]
 boston_housing_test <- BostonHousing[-train_index, ]
 
 #### Train the model ----
+#cv= cross validation resampling method
+#lm=linear regression
+
+
 set.seed(7)
 train_control <- trainControl(method = "cv", number = 5)
 boston_housing_caret_model_lm <- train(medv ~ ., data = boston_housing_train,
@@ -293,6 +299,8 @@ print(paste("SST =", sprintf(sst, fmt = "%#.4f")))
 ##### R Squared ----
 # We then use SSR and SST to compute the value of R squared.
 # The closer the R squared value is to 1, the better the model.
+#sprintf- to define which format you want your print to be in 
+
 r_squared <- 1 - (ssr / sst)
 print(paste("R Squared =", sprintf(r_squared, fmt = "%#.4f")))
 
@@ -309,35 +317,39 @@ print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 ### 2.a. Logistic Regression without caret ----
 # The glm() function is in the stats package and creates a
 # generalized linear model for regression or classification.
-# It can be configured to perform a logistic regression suitable for binary
+# It can be configured to perform a logistic regression suitable for BINARY
 # classification problems.
 
 #### Load and split the dataset ----
-data(PimaIndiansDiabetes)
+library(readr)
+chest_disease <- read_csv("data/chest_disease.csv")
+
+
 
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
+train_index <- createDataPartition(chest_disease$Outcome,
                                    p = 0.7,
                                    list = FALSE)
-pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
-pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
+chest_disease_train <- chest_disease[train_index, ]
+chest_disease_test <- chest_disease[-train_index, ]
 
 #### Train the model ----
-diabetes_model_glm <- glm(diabetes ~ ., data = pima_indians_diabetes_train,
-                          family = binomial(link = "logit"))
+
+chest_disease_model_glm <- glm(Outcome ~ ., data = chest_disease_train,
+                            family = binomial(link = "logit"))
 
 #### Display the model's details ----
-print(diabetes_model_glm)
+print(chest_disease_model_glm)
 
 #### Make predictions ----
-probabilities <- predict(diabetes_model_glm, pima_indians_diabetes_test[, 1:8],
+probabilities <- predict(chest_disease_model_glm, chest_disease_test[, 1:8],
                          type = "response")
 print(probabilities)
-predictions <- ifelse(probabilities > 0.5, "pos", "neg")
+predictions <- ifelse(probabilities > 0.5, "Yes", "No")
 print(predictions)
 
 #### Display the model's evaluation metrics ----
-table(predictions, pima_indians_diabetes_test$diabetes)
+table(predictions, chest_disease_test$Outcome)
 
 # Read the following article on how to compute various evaluation metrics using
 # the confusion matrix:
@@ -345,38 +357,43 @@ table(predictions, pima_indians_diabetes_test$diabetes)
 
 ### 2.b. Logistic Regression with caret ----
 #### Load and split the dataset ----
-data(PimaIndiansDiabetes)
+library(readr)
+chest_disease <- read_csv("data/chest_disease.csv")
+View(chest_disease)
 
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
+train_index <- createDataPartition(chest_disease$Outcome,
                                    p = 0.7,
                                    list = FALSE)
-pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
-pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
+chest_disease_train <- chest_disease[train_index, ]
+chest_disease_test <- chest_disease[-train_index, ]
 
 #### Train the model ----
 # We apply the 5-fold cross validation resampling method
+
 train_control <- trainControl(method = "cv", number = 5)
 # We can use "regLogistic" instead of "glm"
 # Notice the data transformation applied when we call the train function
 # in caret, i.e., a standardize data transform (centre + scale)
 set.seed(7)
-diabetes_caret_model_logistic <-
-  train(diabetes ~ ., data = pima_indians_diabetes_train,
-        method = "regLogistic", metric = "Accuracy",
+
+chest_disease_caret_model_logistic <-
+  train(Outcome ~ ., data = chest_disease_train,
+        method = "glm", metric = "RMSE",
         preProcess = c("center", "scale"), trControl = train_control)
 
 #### Display the model's details ----
-print(diabetes_caret_model_logistic)
+print(chest_disease_caret_model_logistic)
 
 #### Make predictions ----
-predictions <- predict(diabetes_caret_model_logistic,
-                       pima_indians_diabetes_test[, 1:8])
+predictions <- predict(chest_disease_caret_model_logistic,
+                       chest_disease_test[, 1:8])
+predictions<-as.factor(chest_disease_test$Outcome)
 
 #### Display the model's evaluation metrics ----
 confusion_matrix <-
   caret::confusionMatrix(predictions,
-                         pima_indians_diabetes_test[, 1:9]$diabetes)
+                         as.factor(chest_disease_test[, 1:9]$Outcome))
 print(confusion_matrix)
 
 fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
